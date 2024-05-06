@@ -128,10 +128,10 @@ struct Camera {
 
 namespace GlobalCamera {
 // Global Camera Position
-const Vec3 gPos(70, 45, 16);
+const Vec3 gPos(300, 300, 300);
 // Global Camera Look-At
 // const Vec3 gForward(7, -3, 16);
-const Vec3 gForward(32, 25, 32);
+const Vec3 gForward(0, 0, 0);
 
 int gFov = 85;
 

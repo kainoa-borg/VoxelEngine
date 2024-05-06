@@ -8,6 +8,7 @@
 #include "../VoxelEngine/Ray.hpp"
 #include "../VoxelEngine/Debug.hpp"
 #include "../utils/Bmp.hpp"
+#include "../VoxelEngine/Face.hpp"
 
 using namespace std;
 struct SVONode {
@@ -19,6 +20,7 @@ public:
     bool isEmissive;
     Vec3 color;
     Vec3 center;
+    std::vector<Vec3> vertices;
     virtual SVONode* getParent() {};
     virtual void setParent(SVONode* parent) {};
     virtual SVONode** getChildren() {};
@@ -29,10 +31,12 @@ public:
     virtual bool getIsEmissive() {};
     virtual Vec3 getColor() {};
     virtual Vec3 getCenter() {};
+    virtual std::vector<Vec3> setVertices() {};
     virtual void setCenter(Vec3 _center) {};
     virtual void setColor(Vec3 _color) {};
     virtual void setIsLeaf(bool _isLeaf) {};
     virtual void setIsFilled(bool _isFilled) {};
+    virtual void setVertices(std::vector<Vec3> _vertices) {};
 };
 struct SVOLeaf : public SVONode {
 public:
@@ -40,6 +44,7 @@ public:
     bool isLeaf;
     bool isEmissive;
     Vec3 color;
+    std::vector<Vec3> vertices;
 
     Vec3 getColor() {
         return color;
@@ -88,6 +93,11 @@ public:
 
     virtual Vec3 getCenter() {return center;}
     virtual void setCenter(Vec3 _center) {center = _center;}
+
+    virtual std::vector<Vec3> getVertices() {return vertices;}
+    virtual void setVertices(std::vector<Vec3> _vertices) {
+        vertices = _vertices;
+    ;}
 };
 struct SVOBranch : public SVONode {
 public:
@@ -567,7 +577,7 @@ public:
         svoDim = pow(2, depth);
     }
 
-    void fillNode(uint64_t index, Vec3 _position, Vec3 _color, bool _isEmissive) {
+    void fillNode(uint64_t index, Vec3 _position, Vec3 _color, bool _isEmissive, std::vector<Vec3> _vertices) {
         vector<int> indices;
         uint64_t tempIndex = index;
         Vec3 thisPos = getVector3(index);
@@ -593,9 +603,10 @@ public:
         currNode->setColor(_color);
         currNode->setIsEmissive(_isEmissive);
         currNode->setCenter(_position);
+        currNode->setVertices(_vertices);
     }
 
-    void insert(Vec3 position, Vec3 _color, bool _isEmissive) {
+    void insert(Vec3 position, Vec3 _color, bool _isEmissive, std::vector<Vec3> vertices) {
         // Test signed position against SVO dimensions
         SVONode* currRoot = root;
         while(compAgainstBounds(position, svoDim)) {
@@ -609,6 +620,6 @@ public:
         uint64_t index = getIndex(nPosition);
 
         // Traverse SVO to index and fix the voxel
-        fillNode(index, position, _color, _isEmissive);
+        fillNode(index, position, _color, _isEmissive, vertices);
     }
 };

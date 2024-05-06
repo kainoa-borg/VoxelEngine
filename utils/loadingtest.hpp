@@ -4,7 +4,7 @@
 #include "../VoxelEngine/Face.hpp"
 #include <iostream>
 
-Vec3 calcNormalOfFace( Vec3 pPositions[3], Vec3 pNormals[3] )
+Vec3 calcNormalOfFace( std::vector<Vec3> pPositions, Vec3 pNormals[3] )
 {
     Vec3 p0 = pPositions[1] - pPositions[0];
     Vec3 p1 = pPositions[2] - pPositions[0];
@@ -42,7 +42,7 @@ std::vector<std::vector<Face>> loadObj(std::string input_file) {
         auto face_mat_id = -1;
         for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
             size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
-            Vec3 face_vertices[3];
+            std::vector<Vec3> face_vertices;
             Vec3 vertex_normals[3];
             Vec3 vertex_colors[3];
             // Loop over vertices in the face.
@@ -54,7 +54,7 @@ std::vector<std::vector<Face>> loadObj(std::string input_file) {
                 tinyobj::real_t vy = attrib.vertices[3*size_t(idx.vertex_index)+1];
                 tinyobj::real_t vz = attrib.vertices[3*size_t(idx.vertex_index)+2];
 
-                face_vertices[v] = Vec3(vx, vy, vz);
+                face_vertices.push_back(Vec3(vx, vy, vz));
                 
                 // !! Save these vertices for this face somewhere !!
 
@@ -84,8 +84,8 @@ std::vector<std::vector<Face>> loadObj(std::string input_file) {
             // per-face material
             face_mat_id = shapes[s].mesh.material_ids[f];
             Vec3 face_normal = calcNormalOfFace(face_vertices, vertex_normals);
-            Vec3 face_color = (vertex_colors[0] + vertex_colors[1] + vertex_colors[2]) / 3;
-            faces.push_back(Face(face_vertices, face_normal, face_color));
+            // Vec3 face_color = (vertex_colors[0] + vertex_colors[1] + vertex_colors[2]) / 3;
+            faces.push_back(Face(face_vertices, face_normal, Vec3(0,1,0)));
         }
         shapeVec.push_back(faces);
     }

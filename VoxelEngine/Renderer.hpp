@@ -230,39 +230,17 @@ public:
     }
 
     void renderPolyInit() {
-        std::vector<std::tuple<Vec3, Vec3, bool>> voxels;
+        std::vector<std::tuple<Vec3, Vec3, bool, std::vector<Vec3>>> voxels;
         // **Load Model**
-        std::vector<std::vector<Face>> shapeVec = loadObj("../models/obj_files/Low_Poly_Sportcar.obj")
-    }
-
-    void renderVoxInit() {
-        // Container for voxels
-        std::vector< std::tuple<Vec3, Vec3, bool> > voxels;
-
-        // **Load Model**
-        if (engine->chunks.size() <= 0 || engine->chunks[0] == nullptr) {return;}
-        int numModelVoxels = engine->chunks[0]->dataChunk.numVoxels;
-        VoxDataChunk* voxDataChunk = &engine->chunks[0]->dataChunk;
-        std::cout << "Num Voxels: " << numModelVoxels << "\n";
-        for (int i = 0; i < numModelVoxels-1; i++) {
-            Vec3 thisVoxPos = Vec3(voxDataChunk->voxelArray[i].x, voxDataChunk->voxelArray[i].y, voxDataChunk->voxelArray[i].z);
-            voxels.push_back(std::tuple<Vec3, Vec3, bool>(thisVoxPos, Vec3(0, 1, 0), false));
+        std::vector<std::vector<Face>> shapeVec = loadObj("../models/obj_files/Low_Poly_Sportcar.obj");
+        for (int i = 0; i < shapeVec.size(); i++) {
+            std::vector<Face> faces = shapeVec[i];
+            for (int j = 0; j < faces.size(); j++) {
+                // for (int k = 0; k < faces[j].vertices.size(); k++) {
+                    voxels.push_back(std::tuple<Vec3, Vec3, bool, std::vector<Vec3>>(faces[j].center, faces[j].color, false, faces[j].vertices));
+                // }
+            }
         }
-
-        Shapes::CreatePlane(Vec3(16,-5,16), 100, Vec3(1,1,1), false, voxels);
-
-        // **Emissive Cube**
-        // lights.push_back(Vec3(0, 12, 32));
-        // Shapes::CreateCube(lights[0], 3, Vec3(1,1,1)*4, true, voxels);
-        lights.push_back(Vec3(16, -1, -10));
-        Shapes::CreateCube(lights[0], 3, Vec3(1,1,1)*4, true, voxels);
-        lights.push_back(Vec3(64, 7, 64));
-        Shapes::CreateCube(lights[1], 3, Vec3(1,1,1)*4, true, voxels);
-
-        // // **Cube**
-        // Shapes::CreateCube(Vec3(16,-1,16), 5, Vec3(0,1,0), false, voxels);
-        // Shapes::CreateCube(Vec3(8,-4,8), 2, Vec3(1,0,0), false, voxels);
-        // Shapes::CreateCube(Vec3(24,-4,24), 2, Vec3(1,0,0), false, voxels);
 
         // **Sort Voxel Positions
         std::sort(voxels.begin(), voxels.end(), [](auto tupA, auto tupB) {
@@ -271,29 +249,77 @@ public:
 
         // Build SVO
         int numVoxels = voxels.size();
-        svo->insert(std::get<0>(voxels[0]), std::get<1>(voxels[0]), std::get<2>(voxels[0]));
-        svo->insert(std::get<0>(voxels[numVoxels]), std::get<1>(voxels[numVoxels]), std::get<2>(voxels[numVoxels]));
+        svo->insert(std::get<0>(voxels[0]), std::get<1>(voxels[0]), std::get<2>(voxels[0]), std::get<3>(voxels[0]));
+        svo->insert(std::get<0>(voxels[numVoxels]), std::get<1>(voxels[numVoxels]), std::get<2>(voxels[numVoxels]), std::get<3>(voxels[numVoxels]));
         for (int i = 1; i < numVoxels-1; i++) {
-            svo->insert(std::get<0>(voxels[i]), std::get<1>(voxels[i]), std::get<2>(voxels[i]));
+            svo->insert(std::get<0>(voxels[i]), std::get<1>(voxels[i]), std::get<2>(voxels[i]), std::get<3>(voxels[i]));
         }
 
         svo->calcNumNodes();
 
-        SVOBuffer svoBuff(svo);
-
-        svoBuff.buildArray();
-
-        std::vector<NodeData*> arr(svoBuff.nodeArraySize);
-        for (int i = 0; i < svoBuff.nodeArraySize; i++) {
-            arr[i] = svoBuff.nodeArray[i];
-        }
-
-        std::cout << "Foo\n";
-
         std::cout << "Min point: " << svo->getMin() << "\n";
         std::cout << "Max point: " << svo->getMax() << "\n";
-
     }
+
+    // void renderVoxInit() {
+    //     // Container for voxels
+    //     std::vector< std::tuple<Vec3, Vec3, bool> > voxels;
+
+    //     // **Load Model**
+    //     if (engine->chunks.size() <= 0 || engine->chunks[0] == nullptr) {return;}
+    //     int numModelVoxels = engine->chunks[0]->dataChunk.numVoxels;
+    //     VoxDataChunk* voxDataChunk = &engine->chunks[0]->dataChunk;
+    //     std::cout << "Num Voxels: " << numModelVoxels << "\n";
+    //     for (int i = 0; i < numModelVoxels-1; i++) {
+    //         Vec3 thisVoxPos = Vec3(voxDataChunk->voxelArray[i].x, voxDataChunk->voxelArray[i].y, voxDataChunk->voxelArray[i].z);
+    //         voxels.push_back(std::tuple<Vec3, Vec3, bool>(thisVoxPos, Vec3(0, 1, 0), false));
+    //     }
+
+    //     Shapes::CreatePlane(Vec3(16,-5,16), 100, Vec3(1,1,1), false, voxels);
+
+    //     // **Emissive Cube**
+    //     // lights.push_back(Vec3(0, 12, 32));
+    //     // Shapes::CreateCube(lights[0], 3, Vec3(1,1,1)*4, true, voxels);
+    //     lights.push_back(Vec3(16, -1, -10));
+    //     Shapes::CreateCube(lights[0], 3, Vec3(1,1,1)*4, true, voxels);
+    //     lights.push_back(Vec3(64, 7, 64));
+    //     Shapes::CreateCube(lights[1], 3, Vec3(1,1,1)*4, true, voxels);
+
+    //     // // **Cube**
+    //     // Shapes::CreateCube(Vec3(16,-1,16), 5, Vec3(0,1,0), false, voxels);
+    //     // Shapes::CreateCube(Vec3(8,-4,8), 2, Vec3(1,0,0), false, voxels);
+    //     // Shapes::CreateCube(Vec3(24,-4,24), 2, Vec3(1,0,0), false, voxels);
+
+    //     // **Sort Voxel Positions
+    //     std::sort(voxels.begin(), voxels.end(), [](auto tupA, auto tupB) {
+    //         return (std::get<0>(tupA) > std::get<0>(tupB));
+    //     });
+
+    //     // Build SVO
+    //     int numVoxels = voxels.size();
+    //     svo->insert(std::get<0>(voxels[0]), std::get<1>(voxels[0]), std::get<2>(voxels[0]), std::get<3>(voxels[0]));
+    //     svo->insert(std::get<0>(voxels[numVoxels]), std::get<1>(voxels[numVoxels]), std::get<2>(voxels[numVoxels]), std::get<3>(voxels[numVoxels]));
+    //     for (int i = 1; i < numVoxels-1; i++) {
+    //         svo->insert(std::get<0>(voxels[i]), std::get<1>(voxels[i]), std::get<2>(voxels[i]), std::get<3>(voxels[i]));
+    //     }
+
+    //     svo->calcNumNodes();
+
+    //     SVOBuffer svoBuff(svo);
+
+    //     svoBuff.buildArray();
+
+    //     std::vector<NodeData*> arr(svoBuff.nodeArraySize);
+    //     for (int i = 0; i < svoBuff.nodeArraySize; i++) {
+    //         arr[i] = svoBuff.nodeArray[i];
+    //     }
+
+    //     std::cout << "Foo\n";
+
+    //     std::cout << "Min point: " << svo->getMin() << "\n";
+    //     std::cout << "Max point: " << svo->getMax() << "\n";
+
+    // }
 
     void render(int numThreads) {
         // renderVoxInit();
