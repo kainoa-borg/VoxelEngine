@@ -181,7 +181,7 @@ public:
                 if(!inFile.read((char*)&voxData.voxelArray[i].z, 1)) return nullptr;
                 if(!inFile.read((char*)&voxData.voxelArray[i].y, 1)) return nullptr;
                 if(!inFile.read((char*)&voxData.voxelArray[i].iPalette, 1)) return nullptr;
-                voxData.print(i);
+                // voxData.print(i);
             }
 
             VoxChunk* retChunk = new VoxChunk(chunkMetaBuff, voxSizeChunk, voxData);

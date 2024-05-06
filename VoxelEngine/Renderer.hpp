@@ -8,6 +8,8 @@
 #include "Shapes.hpp"
 #include "../Threading/Threads.hpp"
 
+#include "../utils/loadingtest.hpp"
+
 #include "tuple"
 #include "iostream"
 #include "time.h"
@@ -106,7 +108,7 @@ public:
                 // **Computed directContrib**
                 // **Compute indirectContrib**
                 // Inititalize random generator
-                int numSamples = 16;
+                int numSamples = 200;
                 Vec3 Nt, Nb;
                 hitNormal.createCoordinateSystem(Nt, Nb);
 
@@ -146,7 +148,6 @@ public:
 
     void renderBatch(int startIndex, int batchSize, std::vector<Vec3> &lights, iVec2 &resolution, Camera &camera, int &maxBounce) {
         int endIndex = batchSize + startIndex;
-        std::cout << startIndex << " " << endIndex << endl;
         for (int heightIndex = startIndex; heightIndex < endIndex; heightIndex++) {
             for (int widthIndex = 0; widthIndex < resolution.x; widthIndex++) {
                 // unsigned char val = 255 * (float)widthIndex/resolution.x;
@@ -160,8 +161,6 @@ public:
                     Vec3 hitColor = traceBBRayBool(r, lights, 0, maxBounce);
                     totalColor = totalColor + hitColor;
                 }
-
-                totalColor = totalColor; 
 
                 totalColor = Vec3(fmin(totalColor.x,1.0f), fmin(totalColor.y,1.0f), fmin(totalColor.z,1.0f));
 
@@ -184,7 +183,7 @@ public:
         }
     }
 
-    void renderCPU() {
+    void renderCPU(int numThreads) {
         int percent = resolution.y / 100;
         int percentCount = 0;
 
@@ -201,11 +200,12 @@ public:
         int remainderBatchStart = batchSize * (threadCount - 1);
         int remainderBatchSize = batchSize + resolution.y % threadCount;
         std::vector<std::thread> threadVec;
-        Manager m(7);
+        Manager m(numThreads);
 
         // Create threads
         for (int tId = 0; tId < threadCount-1; tId++) {
             int startIndex = batchSize * tId;
+            // std::cout << "Beginning batch " << tId << "/" << threadCount << std::endl;
             m.addTask([this, startIndex, batchSize] { renderBatch(startIndex, batchSize, lights, resolution, camera, maxBounce); });
             // std::thread thisThread([this, startIndex, batchSize, &camera, &generator, &distribution, &maxBounce] { renderBatch(startIndex, batchSize, resolution, camera, generator, distribution, maxBounce); });
             // threadVec.push_back(std::move(thisThread));
@@ -229,7 +229,13 @@ public:
         exportBmp(fileName, bmpHeader, bmpInfoHeader, resolution, pixels);
     }
 
-    void renderInit() {
+    void renderPolyInit() {
+        std::vector<std::tuple<Vec3, Vec3, bool>> voxels;
+        // **Load Model**
+        std::vector<std::vector<Face>> shapeVec = loadObj("../models/obj_files/Low_Poly_Sportcar.obj")
+    }
+
+    void renderVoxInit() {
         // Container for voxels
         std::vector< std::tuple<Vec3, Vec3, bool> > voxels;
 
@@ -240,21 +246,23 @@ public:
         std::cout << "Num Voxels: " << numModelVoxels << "\n";
         for (int i = 0; i < numModelVoxels-1; i++) {
             Vec3 thisVoxPos = Vec3(voxDataChunk->voxelArray[i].x, voxDataChunk->voxelArray[i].y, voxDataChunk->voxelArray[i].z);
-            voxels.push_back(std::tuple<Vec3, Vec3, bool>(thisVoxPos, Vec3(1, 0, 0), false));
+            voxels.push_back(std::tuple<Vec3, Vec3, bool>(thisVoxPos, Vec3(0, 1, 0), false));
         }
 
-        Shapes::CreatePlane(Vec3(16,-5,16), 32, Vec3(1,1,1), false, voxels);
+        Shapes::CreatePlane(Vec3(16,-5,16), 100, Vec3(1,1,1), false, voxels);
 
         // **Emissive Cube**
-        // lights.push_back(Vec3(0, 7, 32));
-        // Shapes::CreateCube(lights[0], 3, Vec3(0,0,1)*5, true, voxels);
-        lights.push_back(Vec3(0, 10, 0));
-        Shapes::CreateCube(lights[0], 4, Vec3(1,1,1)*5, true, voxels);
-        // lights.push_back(Vec3(32, 6, 32));
-        // Shapes::CreateCube(lights[2], 2, Vec3(1,0,1)*5, true, voxels);
+        // lights.push_back(Vec3(0, 12, 32));
+        // Shapes::CreateCube(lights[0], 3, Vec3(1,1,1)*4, true, voxels);
+        lights.push_back(Vec3(16, -1, -10));
+        Shapes::CreateCube(lights[0], 3, Vec3(1,1,1)*4, true, voxels);
+        lights.push_back(Vec3(64, 7, 64));
+        Shapes::CreateCube(lights[1], 3, Vec3(1,1,1)*4, true, voxels);
 
-        // **Cube**
+        // // **Cube**
         // Shapes::CreateCube(Vec3(16,-1,16), 5, Vec3(0,1,0), false, voxels);
+        // Shapes::CreateCube(Vec3(8,-4,8), 2, Vec3(1,0,0), false, voxels);
+        // Shapes::CreateCube(Vec3(24,-4,24), 2, Vec3(1,0,0), false, voxels);
 
         // **Sort Voxel Positions
         std::sort(voxels.begin(), voxels.end(), [](auto tupA, auto tupB) {
@@ -287,9 +295,10 @@ public:
 
     }
 
-    void render() {
-        renderInit();
-        renderCPU();
+    void render(int numThreads) {
+        // renderVoxInit();
+        renderPolyInit();
+        renderCPU(numThreads);
     }
 };
 #endif
