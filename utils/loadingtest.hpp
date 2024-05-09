@@ -1,6 +1,8 @@
 #ifndef TINYOBJLOADER_IMPLEMENTATION
 #define TINYOBJLOADER_IMPLEMENTATION
+#define TINYOBJLOADER_USE_MAPBOX_EARCUT
 #include "tiny_obj_loader.h"
+
 #include "../VoxelEngine/Face.hpp"
 #include <iostream>
 
@@ -11,9 +13,10 @@ Vec3 calcNormalOfFace( std::vector<Vec3> pPositions, Vec3 pNormals[3] )
     Vec3 faceNormal = p0.cross(p1);
 
     Vec3 vertexNormal = pNormals[0];
+    return faceNormal.normalized();
     float dot = faceNormal.dot(vertexNormal);
 
-    return ( dot < 0.0f ) ? -faceNormal : faceNormal;
+    return ( dot < 0.0f ) ? -faceNormal.normalized() : faceNormal.normalized();
 }
 
 std::vector<std::vector<Face>> loadObj(std::string input_file) {
@@ -46,8 +49,7 @@ std::vector<std::vector<Face>> loadObj(std::string input_file) {
             Vec3 vertex_normals[3];
             Vec3 vertex_colors[3];
             // Loop over vertices in the face.
-            for (size_t v = 0; v < fv; v++) {
-                
+            for (size_t v = 0; v < fv; v++) {                
                 // access to vertex
                 tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
                 tinyobj::real_t vx = attrib.vertices[3*size_t(idx.vertex_index)+0];

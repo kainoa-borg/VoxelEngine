@@ -114,8 +114,8 @@ struct Camera {
         ray.invDir.z = 1 / ray.direction.z;
     }
 
-    void constructRay(Ray &ray, iVec2 pixel) {
-        auto pixelCenter = pixelUpperLeft + (pixelDeltaU * pixel.x) + (pixelDeltaV * pixel.y);
+    void constructRay(Ray &ray, float pixelX, float pixelY) {
+        auto pixelCenter = pixelUpperLeft + (pixelDeltaU * pixelX) + (pixelDeltaV * pixelY);
         ray.origin = center;
         ray.direction = pixelCenter - center;
         ray.direction.normalize();
@@ -127,22 +127,22 @@ struct Camera {
 
 
 namespace GlobalCamera {
-// Global Camera Position
-const Vec3 gPos(300, 300, 300);
-// Global Camera Look-At
-// const Vec3 gForward(7, -3, 16);
-const Vec3 gForward(0, 0, 0);
+    // Global Camera Position
+    const Vec3 gPos(-800, 400, -800);
+    // Global Camera Look-At
+    // const Vec3 gForward(7, -3, 16);
+    const Vec3 gForward(0, 0, 0);
 
-int gFov = 85;
+    int gFov = 70;
 
-// Global Camera Up
-Vec3 gUp(0,1,0);
+    // Global Camera Up
+    Vec3 gUp(0,1,0);
 
-int gRes = 200;
+    int gRes = 200;
 
-// Global Camera Resolution
-iVec2 gResolution = iVec2(gRes, gRes);
+    // Global Camera Resolution
+    iVec2 gResolution = iVec2(gRes, gRes);
 
-// Global Camera Instance
-Camera gCamera = Camera(gPos, gUp, gForward, gResolution, gFov);
+    // Global Camera Instance
+    Camera gCamera = Camera(gPos, gUp, gForward, gResolution, gFov);
 }

@@ -20,7 +20,6 @@ public:
     bool isEmissive;
     Vec3 color;
     Vec3 center;
-    std::vector<Vec3> vertices;
     virtual SVONode* getParent() {};
     virtual void setParent(SVONode* parent) {};
     virtual SVONode** getChildren() {};
@@ -93,11 +92,6 @@ public:
 
     virtual Vec3 getCenter() {return center;}
     virtual void setCenter(Vec3 _center) {center = _center;}
-
-    virtual std::vector<Vec3> getVertices() {return vertices;}
-    virtual void setVertices(std::vector<Vec3> _vertices) {
-        vertices = _vertices;
-    ;}
 };
 struct SVOBranch : public SVONode {
 public:
@@ -577,7 +571,7 @@ public:
         svoDim = pow(2, depth);
     }
 
-    void fillNode(uint64_t index, Vec3 _position, Vec3 _color, bool _isEmissive, std::vector<Vec3> _vertices) {
+    void fillNode(uint64_t index, Vec3 _position, Vec3 _color, bool _isEmissive) {
         vector<int> indices;
         uint64_t tempIndex = index;
         Vec3 thisPos = getVector3(index);
@@ -603,10 +597,9 @@ public:
         currNode->setColor(_color);
         currNode->setIsEmissive(_isEmissive);
         currNode->setCenter(_position);
-        currNode->setVertices(_vertices);
     }
 
-    void insert(Vec3 position, Vec3 _color, bool _isEmissive, std::vector<Vec3> vertices) {
+    void insert(Vec3 position, Vec3 _color, bool _isEmissive) {
         // Test signed position against SVO dimensions
         SVONode* currRoot = root;
         while(compAgainstBounds(position, svoDim)) {
@@ -620,6 +613,6 @@ public:
         uint64_t index = getIndex(nPosition);
 
         // Traverse SVO to index and fix the voxel
-        fillNode(index, position, _color, _isEmissive, vertices);
+        fillNode(index, position, _color, _isEmissive);
     }
 };

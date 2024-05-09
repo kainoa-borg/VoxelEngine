@@ -39,7 +39,7 @@ static void debugRenderBox(Vec3 center, Vec3 goalPoint, Vec3 rayHitPoint, float 
             // unsigned char val = 255 * (float)widthIndex/GlobalCamera::gResolution.x;
             unsigned char val = 255;
             Ray r;
-            GlobalCamera::gCamera.constructRay(r, iVec2(widthIndex, heightIndex));
+            GlobalCamera::gCamera.constructRay(r, widthIndex, heightIndex);
 
             float tMin;
             float tMax;

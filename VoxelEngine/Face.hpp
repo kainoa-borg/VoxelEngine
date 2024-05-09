@@ -17,6 +17,6 @@ public:
         center = (_vertices[0] + _vertices[1] + _vertices[2]) / 3;
         vertices = _vertices;
         normal = _normal;
-        color = _color;
+        color = Vec3(1, 1, 1);
     }
 };
