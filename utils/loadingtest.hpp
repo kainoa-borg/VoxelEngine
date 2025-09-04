@@ -1,19 +1,22 @@
 #ifndef TINYOBJLOADER_IMPLEMENTATION
 #define TINYOBJLOADER_IMPLEMENTATION
+#define TINYOBJLOADER_USE_MAPBOX_EARCUT
 #include "tiny_obj_loader.h"
+
 #include "../VoxelEngine/Face.hpp"
 #include <iostream>
 
-Vec3 calcNormalOfFace( Vec3 pPositions[3], Vec3 pNormals[3] )
+Vec3 calcNormalOfFace( std::vector<Vec3> pPositions, Vec3 pNormals[3] )
 {
     Vec3 p0 = pPositions[1] - pPositions[0];
     Vec3 p1 = pPositions[2] - pPositions[0];
     Vec3 faceNormal = p0.cross(p1);
 
     Vec3 vertexNormal = pNormals[0];
+    return faceNormal.normalized();
     float dot = faceNormal.dot(vertexNormal);
 
-    return ( dot < 0.0f ) ? -faceNormal : faceNormal;
+    return ( dot < 0.0f ) ? -faceNormal.normalized() : faceNormal.normalized();
 }
 
 std::vector<std::vector<Face>> loadObj(std::string input_file) {
@@ -42,19 +45,18 @@ std::vector<std::vector<Face>> loadObj(std::string input_file) {
         auto face_mat_id = -1;
         for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
             size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
-            Vec3 face_vertices[3];
+            std::vector<Vec3> face_vertices;
             Vec3 vertex_normals[3];
             Vec3 vertex_colors[3];
             // Loop over vertices in the face.
-            for (size_t v = 0; v < fv; v++) {
-                
+            for (size_t v = 0; v < fv; v++) {                
                 // access to vertex
                 tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
                 tinyobj::real_t vx = attrib.vertices[3*size_t(idx.vertex_index)+0];
                 tinyobj::real_t vy = attrib.vertices[3*size_t(idx.vertex_index)+1];
                 tinyobj::real_t vz = attrib.vertices[3*size_t(idx.vertex_index)+2];
 
-                face_vertices[v] = Vec3(vx, vy, vz);
+                face_vertices.push_back(Vec3(vx, vy, vz));
                 
                 // !! Save these vertices for this face somewhere !!
 
@@ -84,8 +86,8 @@ std::vector<std::vector<Face>> loadObj(std::string input_file) {
             // per-face material
             face_mat_id = shapes[s].mesh.material_ids[f];
             Vec3 face_normal = calcNormalOfFace(face_vertices, vertex_normals);
-            Vec3 face_color = (vertex_colors[0] + vertex_colors[1] + vertex_colors[2]) / 3;
-            faces.push_back(Face(face_vertices, face_normal, face_color));
+            // Vec3 face_color = (vertex_colors[0] + vertex_colors[1] + vertex_colors[2]) / 3;
+            faces.push_back(Face(face_vertices, face_normal, Vec3(0,1,0)));
         }
         shapeVec.push_back(faces);
     }

@@ -8,6 +8,7 @@
 #include "../VoxelEngine/Ray.hpp"
 #include "../VoxelEngine/Debug.hpp"
 #include "../utils/Bmp.hpp"
+#include "../VoxelEngine/Face.hpp"
 
 using namespace std;
 struct SVONode {
@@ -29,10 +30,12 @@ public:
     virtual bool getIsEmissive() {};
     virtual Vec3 getColor() {};
     virtual Vec3 getCenter() {};
+    virtual std::vector<Vec3> setVertices() {};
     virtual void setCenter(Vec3 _center) {};
     virtual void setColor(Vec3 _color) {};
     virtual void setIsLeaf(bool _isLeaf) {};
     virtual void setIsFilled(bool _isFilled) {};
+    virtual void setVertices(std::vector<Vec3> _vertices) {};
 };
 struct SVOLeaf : public SVONode {
 public:
@@ -40,6 +43,7 @@ public:
     bool isLeaf;
     bool isEmissive;
     Vec3 color;
+    std::vector<Vec3> vertices;
 
     Vec3 getColor() {
         return color;

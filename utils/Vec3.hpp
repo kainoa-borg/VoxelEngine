@@ -229,6 +229,18 @@ public:
         out << "(" << v.x << ", " << v.y << ", " << v.z << ")";
         return out;
     }
+
+    static Vec3 fminf(Vec3 a, Vec3 b);
+    static Vec3 fmaxf(Vec3 a, Vec3 b);
+
+    float operator[](int index) {
+        if (index > 2 || index < 0) return -1;
+        switch(index) {
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+        }
+    }
 };
 
 void iVec3::operator=(Vec3 other) {
@@ -253,6 +265,14 @@ bool Vec3::operator>(iVec3 other) {
 }
 bool Vec3::operator<(iVec3 other) {
     return (x < other.x && y < other.y && z < other.z);
+}
+
+Vec3 Vec3::fminf(Vec3 a, Vec3 b) {
+    return Vec3(fmin(a.x, b.x), fmin(a.y, b.y), fmin(a.z, b.z));
+}
+
+Vec3 Vec3::fmaxf(Vec3 a, Vec3 b) {
+    return Vec3(fmax(a.x, b.x), fmax(a.y, b.y), fmax(a.z, b.z));
 }
 
 iVec3 iVec3::operator*(Vec3 other) {
